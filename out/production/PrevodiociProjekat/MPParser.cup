@@ -1,0 +1,338 @@
+// import section
+
+import java_cup.runtime.*;
+import java.io.*;
+import java.util.ArrayList;
+
+parser code {:
+
+   public int errNo = 0;
+
+   public static void main( String[] args ) {
+      try {
+		   FileReader file = new FileReader(args[0]);
+		   Scanner scanner = new MPLexer(file);
+
+		   MPParser parser = new MPParser(scanner);
+		   parser.parse();
+	  }
+	  catch (Exception e) {
+		   System.out.println(e);
+	  }
+   }
+
+   public void syntax_error(Symbol cur_token) {}
+
+   public void report_error(String message, Object info) {
+   	   System.out.print( message );
+   }
+
+:};
+
+
+// Terminal symbols
+terminal MyVal MAIN, OPENP, CLOSEP, OPENB, CLOSEB, COL, SEMICOL, COMMA, ID, INT, CHAR, REAL, BOOL;
+terminal MyVal REPEAT, UNTIL, ASGN, READ, WRITE, OR, AND, LESS, LESSEQ, ISEQ, DIFF, GRET, GRETEQ;
+terminal MyVal PLUS, MINUS, MULT, DIV, INTCONST, REALCONST, BOOLCONST, CHARCONST;
+
+// Nonterminal symbols
+non terminal MyVal Program, Block, VarDecl, Type;
+non terminal ArrayList VarList, StatementList, NameList, ExpressionList;
+non terminal MyVal Statement, Expression, AndExpression, RelExpression, ArExpression;
+non terminal MyVal RelOp, Term, Factor;
+
+
+// Grammar
+
+start with Program;
+
+Program ::= MAIN OPENP CLOSEP Block
+{:
+    System.out.println("Procitan program");
+:};
+
+
+Block ::= OPENB:opc VarList StatementList CLOSEB:cls
+{:
+
+    Boolean p = Table.getInstance().exitBlock(opc.line);
+    if (p)
+        System.out.println("Varijabla vise puta deklarisana u bloku " + opc.line);
+
+    System.out.println("Blok zavrsen " + cls.line);
+
+:};
+
+
+VarList ::= VarList VarDecl
+{:
+:}
+| VarDecl
+{:
+:};
+
+
+VarDecl ::= NameList:nlist COL Type:type SEMICOL
+{:
+
+    for (Object i: nlist) {
+        ((MyVal) i).type = type.type;
+        Table.getInstance().declare((MyVal) i);
+    }
+
+:};
+
+
+NameList ::= NameList:nlist COMMA ID:id
+{:
+    RESULT = nlist;
+    RESULT.add(id);
+:}
+| ID:id
+{:
+    RESULT = new ArrayList<>();
+    RESULT.add(id);
+:};
+
+
+Type ::= INT
+{:
+    RESULT = new MyVal();
+    RESULT.type = MyVal._int;
+:}
+| CHAR
+{:
+    RESULT=new MyVal();
+    RESULT.type = MyVal._char;
+:}
+| REAL
+{:
+    RESULT = new MyVal();
+    RESULT.type = MyVal._real;
+:}
+| BOOL
+{:
+    RESULT = new MyVal();
+    RESULT.type = MyVal._bool;
+:};
+
+
+StatementList ::= StatementList Statement
+{:
+:}
+| Statement
+{:
+:};
+
+
+Statement ::= REPEAT StatementList UNTIL Expression:ex SEMICOL
+{:
+
+    if (ex.type != MyVal._bool)
+        System.out.println("Expression not bool " + ex.line);
+
+:}
+| ID:id ASGN Expression:ex SEMICOL
+{:
+
+    MyVal var = Table.getInstance().getVar(id.name);
+    if (var == null)
+        System.out.println(id.name + " undeclared line: " + id.line);
+    else {
+        if (var.type == MyVal._bool) {
+            if (ex.type != MyVal._bool)
+                System.out.println("Cant convert types line:" + id.line);
+        }
+        else {
+            if (ex.type == MyVal._bool)
+                System.out.println("Cant convert types line:" + id.line);
+        }
+
+        var.defined = id.line;
+    }
+
+:}
+| READ OPENP NameList:nlist CLOSEP:clp SEMICOL
+{:
+
+    for (Object i: nlist) {
+        MyVal p = (MyVal) i;
+
+        MyVal b = Table.getInstance().getVar(p.name);
+
+        if (b == null)
+            System.out.println("Reading to undeclared variable: Line: " + clp.line);
+
+        b.defined = clp.line;
+    }
+
+:}
+| WRITE OPENP ExpressionList CLOSEP SEMICOL
+{:
+:}
+| Block
+{:
+:};
+
+
+Expression ::= Expression:ex1 OR AndExpression:ex2
+{:
+
+    if (ex1.type != MyVal._bool || ex2.type != MyVal._bool)
+        System.out.println("Operands must be bool: Line: " + ex1.line);
+
+    RESULT = ex1;
+:}
+| AndExpression:ex
+{:
+    RESULT = ex;
+:};
+
+
+AndExpression ::= AndExpression:ex1 AND RelExpression:ex2
+{:
+    if (ex1.type != MyVal._bool || ex2.type != MyVal._bool)
+        System.out.println("Operands must be bool: Line: " + ex1.line);
+
+    RESULT = ex1;
+:}
+| RelExpression:ex
+{:
+    RESULT = ex;
+:};
+
+
+RelExpression ::= ArExpression:ex1 RelOp ArExpression:ex2
+{:
+
+    if (ex1.type == MyVal._bool || ex2.type == MyVal._bool)
+        System.out.println("Operands must be numeric: Line: " + ex1.line);
+
+    RESULT = ex1;
+    RESULT.type = MyVal._bool;
+:}
+| ArExpression:ex
+{:
+    RESULT = ex;
+:};
+
+
+RelOp ::= LESS
+{:
+:}
+| LESSEQ
+{:
+:}
+| ISEQ
+{:
+:}
+| DIFF
+{:
+:}
+| GRET
+{:
+:}
+| GRETEQ
+{:
+:};
+
+
+ArExpression ::= ArExpression:ex1 PLUS Term:ex2
+{:
+    if(ex1.type == MyVal._bool || ex2.type == MyVal._bool) {
+        System.out.println("Operands must be numeric: Line: " + ex1.line);
+    }
+    RESULT = ex1;
+    if (RESULT.type < ex2.type)
+        RESULT.type = ex2.type;
+:}
+| ArExpression:ex1 MINUS Term:ex2
+{:
+    if (ex1.type == MyVal._bool || ex2.type == MyVal._bool) {
+        System.out.println("Operands must be numeric: Line: " + ex1.line);
+    }
+    RESULT = ex1;
+    if (RESULT.type < ex2.type)
+            RESULT.type = ex2.type;
+
+:}
+| Term:ex
+{:
+    RESULT = ex;
+:};
+
+
+Term ::= Term:ex1 MULT Factor:ex2
+{:
+    if(ex1.type==MyVal._bool || ex2.type==MyVal._bool){
+        System.out.println("Operands must be numeric: Line: "+ex1.line);
+    }
+    RESULT=ex1;
+    if(RESULT.type<ex2.type)
+            RESULT.type=ex2.type;
+:}
+| Term:ex1 DIV Factor:ex2
+{:
+    if(ex1.type==MyVal._bool || ex2.type==MyVal._bool){
+        System.out.println("Operands must be numeric: Line: "+ex1.line);
+    }
+    RESULT=ex1;
+    if(RESULT.type<ex2.type)
+            RESULT.type=ex2.type;
+:}
+| Factor:ex
+{:
+    RESULT=ex;
+:};
+
+
+Factor ::= ID:id
+{:
+
+    MyVal b = Table.getInstance().getVar(id.name);
+    if (b == null) {
+        System.out.println("Undeclared variable: Line: " + id.line);
+        RESULT=id;
+    }
+    else {
+        if (b.defined == -1) {
+            System.out.println("Undefined value of variable: Line: " + id.line);
+        }
+        id.type = b.type;
+        id.defined = b.defined;
+        RESULT=id;
+    }
+
+:}
+| INTCONST:ex
+{:
+    ex.type=MyVal._int;
+    RESULT=ex;
+:}
+| CHARCONST:ex
+{:
+    ex.type=MyVal._char;
+    RESULT=ex;
+:}
+| REALCONST:ex
+{:
+    ex.type=MyVal._real;
+    RESULT=ex;
+:}
+| BOOLCONST:ex
+{:
+    ex.type=MyVal._bool;
+    RESULT=ex;
+:}
+| OPENP Expression:ex CLOSEP
+{:
+    RESULT=ex;
+:};
+
+
+ExpressionList ::= ExpressionList COMMA Expression
+{:
+:}
+| Expression
+{:
+:};
