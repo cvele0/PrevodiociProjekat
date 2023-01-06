@@ -1,0 +1,17 @@
+main()
+{
+(*komentar
+u vise linija*)
+a,b,c,d :int ;
+a = 1;
+b = 1;
+d = 1;
+repeat
+   {
+       c = a + b;
+       a = b;
+       b = c;
+       d = d + 1;
+    } until (d == 10);
+write(c);
+}
