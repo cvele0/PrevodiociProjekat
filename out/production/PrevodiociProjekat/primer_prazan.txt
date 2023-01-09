@@ -1,9 +1,7 @@
 main()
 {
-a,b,c :int ;
-read(a);
-read(b);
-c=a+b;
-write(c);
-
+a: int;
+a = 0;
+write(a);
+(*sdfsd*)
 }

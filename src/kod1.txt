@@ -1,3 +1,5 @@
+(*asssssssssss
+asdasda*)
 main()
 {
 (*komentar
