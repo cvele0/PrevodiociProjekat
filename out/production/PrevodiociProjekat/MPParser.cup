@@ -61,7 +61,8 @@ Block ::= OPENB:opc VarList StatementList CLOSEB:cls
 
     System.out.println("Blok zavrsen " + cls.line);
 
-:};
+:} | OPENB VarList CLOSEB
+| OPENB StatementList CLOSEB;
 
 
 VarList ::= VarList VarDecl

@@ -1,0 +1,13 @@
+main()
+{
+(*komentar
+u vise linija*)
+a,b,c,d :char ;
+a = 'a';
+b = 'b';
+c = 'c';
+d = 'd';
+repeat d = d + 1 until (a || b);
+write(c);
+write(d + c);
+}
