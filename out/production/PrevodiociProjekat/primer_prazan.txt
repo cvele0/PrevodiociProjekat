@@ -3,5 +3,9 @@ main()
 a: int;
 a = 0;
 write(a);
-(*sdfsd*)
+
+repeat
+a=a+1;
+until a < 5;
+(*komentar*)
 }

@@ -136,7 +136,7 @@ Statement ::= REPEAT StatementList UNTIL Expression:ex SEMICOL
         System.out.println("Expression not bool " + ex.line);
 
 :}
-| ID:id ASGN Expression:ex SEMICOL
+| ID:id ASGN ArExpression:ex SEMICOL
 {:
 
     MyVal var = Table.getInstance().getVar(id.name);
@@ -328,7 +328,7 @@ Factor ::= ID:id
     ex.type=MyVal._bool;
     RESULT=ex;
 :}
-| OPENP Expression:ex CLOSEP
+| OPENP ArExpression:ex CLOSEP
 {:
     RESULT=ex;
 :};
