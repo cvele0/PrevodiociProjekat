@@ -1,0 +1,11 @@
+main()
+{
+a,b,,d :char ;
+a = 'a';
+b = 'b';
+d = 'd';
+read(z)
+write(a)
+read(
+repeat a = a + 1;
+}

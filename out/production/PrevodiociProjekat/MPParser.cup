@@ -96,7 +96,14 @@ NameList ::= NameList:nlist COMMA ID:id
 {:
     RESULT = new ArrayList<>();
     RESULT.add(id);
-:};
+:}
+|
+NameList:nlist COMMA:com error
+{:
+    RESULT = nlist;
+    System.out.println("Missing a comma in line " + com.line);
+:}
+;
 
 
 Type ::= INT
@@ -167,15 +174,64 @@ Statement ::= REPEAT StatementList UNTIL Expression:ex SEMICOL
         if (b == null)
             System.out.println("Reading to undeclared variable: Line: " + clp.line);
 
-        b.defined = clp.line;
+        if (b != null) b.defined = clp.line;
     }
 
+:}
+| READ OPENP NameList:nlist CLOSEP:clp error
+{:
+    for (Object i: nlist) {
+        MyVal p = (MyVal) i;
+
+        MyVal b = Table.getInstance().getVar(p.name);
+
+        if (b == null)
+            System.out.println("Reading to undeclared variable: Line: " + clp.line);
+
+        if (b != null) b.defined = clp.line;
+    }
+    System.out.println("Missing comma in line " + clp.line);
+:}
+| READ OPENP:op NameList:nlist error
+{:
+    System.out.println("Missing closing bracket in line " + op.line);
+:}
+| READ OPENP:op error
+{:
+    System.out.println("Invalid read function in line " + op.line);
 :}
 | WRITE OPENP ExpressionList CLOSEP SEMICOL
 {:
 :}
+| WRITE OPENP ExpressionList CLOSEP:cl error
+{:
+    System.out.println("Missing a comma in line " + cl.line);
+:}
+| WRITE OPENP:op ExpressionList error
+{:
+    System.out.println("Missing a closing bracket in line " + op.line);
+:}
+| WRITE OPENP:op error
+{:
+    System.out.println("Invalid write function in line " + op.line);
+:}
 | Block
 {:
+:}
+|
+REPEAT StatementList UNTIL Expression:ex error
+{:
+    System.out.println("Missing a comma in line " + ex.line);
+:}
+|
+REPEAT StatementList UNTIL:un error
+{:
+    System.out.println("Missing expression part in line " + un.line);
+:}
+|
+REPEAT:rp StatementList error
+{:
+    System.out.println("Missing until part in line " + rp.line);
 :};
 
 
