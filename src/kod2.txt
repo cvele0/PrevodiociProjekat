@@ -1,7 +1,5 @@
 main()
 {
-(*komentar
-u vise linija*)
 a,b,c,d :int ;
 a = 1;
 b = 1;
@@ -12,6 +10,6 @@ repeat
        a = b;
        b = c;
        d = d + 1;
-    } until (d == 10);
+    } until d == 10;
 write(c);
 }

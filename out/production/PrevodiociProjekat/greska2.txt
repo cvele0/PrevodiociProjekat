@@ -1,26 +1,16 @@
 main()
 {
-(*komentar
-u vise linija*)
 sum :int;
-sum = 0;
+sum: int;
 cnt: int;
+sum = 0;
 cnt = 1;
 repeat {
         sum = sum + cnt;
         cnt = cnt + 1;
-    } until (cnt == 10);
-}
+    } until cnt == 10;
 write(sum);
 sum = 0;
 cnt = 1;
-repeat {
-        sum = sum + cnt;
-        cnt = cnt + 1;
-        (* ponovna deklaracija promenjive *)
-        cnt: int;
-        cnt = 5;
-    } until (cnt == 10);
-}
 write(sum);
 }

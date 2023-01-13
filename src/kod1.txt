@@ -5,5 +5,5 @@ read(a);
 read(b);
 c=a+b;
 write(c);
-repeat a=a+1 until (a==c);
+repeat a=a+1; until a < 5;
 }

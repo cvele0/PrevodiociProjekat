@@ -3,8 +3,5 @@ main()
 a: int;
 a = 0;
 write(a);
-
-repeat
-a=a+1;
-until a < 5;
+repeat a=a+1; until a < 5;
 }
