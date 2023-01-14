@@ -4,6 +4,7 @@ a,b,,d :char ;
 a = 'a';
 b = 'b';
 d = 'd';
+d = a > b;
 read(z)
 write(a)
 read(
